@@ -1,94 +1,108 @@
-# my-simple-agent
+# Travel PA — AI Travel Personal Assistant Agent
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `1.1.0`
+Travel PA is an intelligent AI personal travel assistant built with the **Google Agent Development Kit (ADK)** and powered by **Gemini**. It helps travelers search for destinations, generate destination imagery and short videos, look up live weather and exchange rates, geocode addresses, find nearby points of interest, manage travel catalogs, and maintain long-term memory of user preferences and dietary restrictions across sessions.
 
-## Project Structure
-
-```
-my-simple-agent/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
-│   ├── fast_api_app.py        # FastAPI Backend server
-│   └── app_utils/             # App utilities and helpers
-├── tests/                     # Unit, integration, and load tests
-├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
-```
-
-> 💡 **Tip:** Use [Antigravity CLI](https://antigravity.google/) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
-
-## Requirements
-
-Before you begin, ensure you have:
-- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
-- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-
-
-## Quick Start
-
-Install `agents-cli` and its skills if not already installed:
-
-```bash
-uvx google-agents-cli setup
-```
-
-Install required packages:
-
-```bash
-agents-cli install
-```
-
-Test the agent with a local web server:
-
-```bash
-agents-cli playground
-```
-
-You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
-
-## Commands
-
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `agents-cli install` | Install dependencies using uv                                                         |
-| `agents-cli playground` | Launch local development environment                                                  |
-| `agents-cli lint`    | Run code quality checks                                                               |
-| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
-| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
-| `agents-cli deploy`  | Deploy agent to Agent Runtime                                                                |
-| `agents-cli publish gemini-enterprise` | Register deployed agent to Gemini Enterprise                    || [A2A Inspector](https://github.com/a2aproject/a2a-inspector) | Launch A2A Protocol Inspector                                                        |
-
-## 🛠️ Project Management
-
-| Command | What It Does |
-|---------|--------------|
-| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
-| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
-| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+![Travel PA Demo](agent_demo.gif)
 
 ---
 
-## Development
+## 🚀 Key Implemented Capabilities
 
-Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+Every feature below is implemented in `app/agent.py` and supported by Google Cloud services:
 
-## Deployment
+* **Long-Term Memory Bank (`VertexAiMemoryBankService`)**: Persists user preferences, trip context, and critical dietary/allergy restrictions across sessions so recommendations stay tailored and safe.
+* **Firestore Destination Catalog (`google-cloud-firestore`)**: Search catalog items by city/category (`search_travel_spots`) and store new travel destinations dynamically (`add_travel_spot`).
+* **AI Image Generation (`gemini-3.1-flash-lite-image`)**: Generates visual travel destination images, saves artifacts to ADK Playground, and uploads directly to public Cloud Storage buckets (`generate_spot_image`).
+* **AI Video Generation (`gemini-omni-flash-preview`)**: Streams short destination video generation via Google's Omni model, saving video artifacts and uploading to public Cloud Storage buckets (`generate_spot_video`).
+* **Google Maps Location Services**:
+  * **Address Geocoding**: Resolves addresses and landmarks into exact lat/long coordinates using Google Maps Geocoding API (`geocode_address`).
+  * **Nearby Places Search**: Discovers nearby restaurants, museums, parks, and attractions using Google Places API (`find_nearby_places`).
+* **Real-Time Live Weather (`Open-Meteo API`)**: Fetches current temperature, humidity, and wind conditions for any city worldwide (`get_live_weather`).
+* **Currency Exchange (`Frankfurter API`)**: Converts monetary amounts between international currency codes using real-time rates (`convert_currency`).
+* **Time Zone Lookup**: Retrieves current local times across worldwide time zones (`get_current_time`).
+* **Sandboxed Code Execution (`AgentEngineSandboxCodeExecutor`)**: Runs python code dynamically inside isolated execution sandboxes.
+* **Generative A2UI Rich Cards (`a2ui`)**: Generates structured, responsive UI surfaces (`Card`, `Column`, `Row`, `Text`, `Image`) rendered directly in the user interface.
 
+---
+
+## 📂 Project Structure
+
+```
+travel-pa/
+├── app/
+│   ├── agent.py               # Main agent logic, tools, memory, and A2UI callbacks
+│   ├── a2ui_utils.py          # A2UI response formatting helper
+│   ├── fast_api_app.py        # Local FastAPI proxy server for agent interaction
+│   └── app_utils/             # Core app utilities and helpers
+├── frontend/                  # Lightweight FastAPI proxy and plain web chat interface
+├── tests/                     # Unit, integration, and evaluation tests
+├── agent_demo.gif             # Recorded demo animation of the agent interface
+├── agents-cli-manifest.yaml   # Manifest declaring deployment metadata and runtime config
+├── GEMINI.md                  # Development guide and context for Antigravity AI assistant
+└── pyproject.toml             # Python dependencies managed via uv
+```
+
+---
+
+## 🛠️ Prerequisites
+
+Before running the project locally:
+
+1. **Python 3.10+** and **uv** package manager ([Installation Guide](https://docs.astral.sh/uv/getting-started/installation/))
+2. **Google Cloud SDK** (`gcloud`) logged in with access to your GCP project:
+   ```bash
+   gcloud auth login
+   gcloud auth application-default login
+   gcloud config set project <YOUR_PROJECT_ID>
+   ```
+3. **Environment Variables**: Set required keys (e.g. `GOOGLE_MAPS_API_KEY`) in `.env` or export them in your shell environment:
+   ```bash
+   export GOOGLE_MAPS_API_KEY="<your-google-maps-api-key>"
+   ```
+
+---
+
+## 💻 Local Setup & Running Instructions
+
+### 1. Install Dependencies
 ```bash
-gcloud config set project <your-project-id>
+uv sync
+```
+
+### 2. Test in Local Playground
+Run the interactive ADK developer playground:
+```bash
+uv run agents-cli playground
+```
+
+### 3. Run Local Frontend Chat UI Server
+Start the frontend web application locally:
+```bash
+cd frontend
+uv run python main.py
+```
+Open your browser to the local server address printed in the terminal console.
+
+---
+
+## ☁️ Deployment
+
+Deploy the agent logic to **Agent Engine / Agent Runtime**:
+```bash
 agents-cli deploy
 ```
 
-To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
-To set up your production infrastructure, run `agents-cli infra cicd`.
+Deploy the frontend service to **Cloud Run**:
+```bash
+gcloud run deploy travel-pa-frontend \
+  --source=./frontend \
+  --region=us-east1 \
+  --allow-unauthenticated \
+  --set-env-vars AGENT_ENGINE_RESOURCE_NAME="<YOUR_DEPLOYED_RESOURCE_NAME>",AGENT_DIRECTORY="app"
+```
 
-## Observability
+---
 
-Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
+## 📄 License
 
-## A2A Inspector
-
-This agent supports the [A2A Protocol](https://a2a-protocol.org/). Use the [A2A Inspector](https://github.com/a2aproject/a2a-inspector) to test interoperability.
-See the [A2A Inspector docs](https://github.com/a2aproject/a2a-inspector) for details.
+This project is licensed under the Apache 2.0 License.
