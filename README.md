@@ -4,6 +4,8 @@ Travel PA is an intelligent AI personal travel assistant built with the **Google
 
 ![Travel PA Demo](agent_demo.gif)
 
+🎵 **[Click here to watch the full demo video with Lyria upbeat lo-fi audio track (`agent_demo_music.webm`)](agent_demo_music.webm)**
+
 ---
 
 ## 🚀 Key Implemented Capabilities
